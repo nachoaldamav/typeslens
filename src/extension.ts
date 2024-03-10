@@ -6,6 +6,7 @@ import { convertToDefinitelyTyped } from './utils/name-to-typed';
 import { findPackageJson } from './utils/find-package';
 import { getPackageJsonFromName } from './utils/package-from-name';
 import { packageHasTypes } from './utils/package-has-types';
+import { findNearestNodeModules } from './utils/find-near-nm';
 
 export function activate(context: vscode.ExtensionContext) {
   console.log('Congratulations, your extension "typeslens" is now active!');
@@ -219,8 +220,11 @@ class TypeSuggestionCodeLensProvider implements vscode.CodeLensProvider {
     return codeLenses;
   }
 
-  // Optional - Called when the CodeLens is clicked to let you handle the action
   resolveCodeLens?(codeLens: vscode.CodeLens): vscode.CodeLens | null {
-    return codeLens; // No change in this case.
+    // When clicked, the Types package will be installed, so we need to remove the clicked CodeLens
+    if (codeLens.isResolved) {
+      codeLens.range = new vscode.Range(0, 0, 0, 0);
+    }
+    return codeLens;
   }
 }
