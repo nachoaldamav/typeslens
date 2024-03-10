@@ -133,6 +133,8 @@ export function deactivate() {}
  * suggests to install them automatically.
  */
 class TypeSuggestionCodeLensProvider implements vscode.CodeLensProvider {
+  private dependenciesWithoutDefinitelyTyped: string[] = [];
+
   async provideCodeLenses(
     document: vscode.TextDocument
   ): Promise<vscode.CodeLens[]> {
@@ -166,6 +168,13 @@ class TypeSuggestionCodeLensProvider implements vscode.CodeLensProvider {
           // @ts-expect-error - The types of the parser are not correct
           const packageName = item.source.value;
 
+          if (
+            this.dependenciesWithoutDefinitelyTyped.includes(packageName) ||
+            packageName.startsWith('@types/')
+          ) {
+            continue;
+          }
+
           console.log(
             `Trying to find types for ${packageName} from ${document.uri.fsPath}`
           );
@@ -188,6 +197,7 @@ class TypeSuggestionCodeLensProvider implements vscode.CodeLensProvider {
 
           if (!typeExists) {
             console.log(`Package ${packageName} does not have types`);
+            this.dependenciesWithoutDefinitelyTyped.push(packageName);
             continue;
           }
 
