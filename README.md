@@ -3,11 +3,9 @@
 ## Overview
 typeslens is a Visual Studio Code extension designed to enhance your TypeScript development experience. It intelligently scans the imports in your code and alerts you whenever it detects a package that could benefit from TypeScript type definitions available on npm. If a corresponding @types package is available, typeslens suggests an inline notification, 'Install types for X (@types/X)', right in your imports.
 
-Streamline your TypeScript coding with this simple, yet powerful tool.
-
 ## Features
-- Automatic Parsing: Utilizes Babel to parse currently open files and extract all import statements.
-- Local Search for Modules: Identifies installed modules and checks for available TypeScript definitions.
+- Automatic Parsing: Uses Babel to parse currently open files and extract all import statements.
+- Local Search for Modules: Identifies installed modules based on the location of the file and checks for available TypeScript definitions.
 - Package Manager Compatibility: Detects and adheres to the package manager used in your project (npm, yarn, pnpm, bun, and Bit), with npm as the default.
 - Lockfile Analysis: Analyzes the lockfiles in your project's root directory to ensure compatibility with your package manager and project dependencies.
 
