@@ -11,17 +11,17 @@ import { findNearestNodeModules } from './utils/find-near-nm';
 export function activate(context: vscode.ExtensionContext) {
   console.log('Congratulations, your extension "typeslens" is now active!');
 
-  const jsFileLensProvider = vscode.languages.registerCodeLensProvider(
-    { language: 'javascript', scheme: 'file' },
-    new TypeSuggestionCodeLensProvider()
-  );
+  // const jsFileLensProvider = vscode.languages.registerCodeLensProvider(
+  //   { language: 'javascript', scheme: 'file' },
+  //   new TypeSuggestionCodeLensProvider()
+  // );
 
   const tsFileLensProvider = vscode.languages.registerCodeLensProvider(
     { language: 'typescript', scheme: 'file' },
     new TypeSuggestionCodeLensProvider()
   );
 
-  context.subscriptions.push(jsFileLensProvider);
+  // context.subscriptions.push(jsFileLensProvider);
   context.subscriptions.push(tsFileLensProvider);
 
   const installCommandDisposable = vscode.commands.registerCommand(
@@ -144,6 +144,19 @@ class TypeSuggestionCodeLensProvider implements vscode.CodeLensProvider {
 
     const parsedAST = parse(codeText, {
       sourceType: 'module',
+      plugins: [
+        'jsx',
+        'typescript',
+        'classProperties',
+        'dynamicImport',
+        'exportDefaultFrom',
+        'exportNamespaceFrom',
+        'functionBind',
+        'nullishCoalescingOperator',
+        'objectRestSpread',
+        'optionalChaining',
+        'decorators-legacy',
+      ],
     });
 
     if (!parsedAST) {
@@ -190,13 +203,24 @@ class TypeSuggestionCodeLensProvider implements vscode.CodeLensProvider {
           const typesPackageName = convertToDefinitelyTyped(packageName);
 
           const typeExists = await fetch(
-            `https://registry.npmjs.org/${typesPackageName}`
+            `https://registry.npmjs.org/${typesPackageName}`,
+            {
+              // Request compressed metadata
+              headers: {
+                'Application-Accept': 'application/vnd.npm.install-v1+json',
+              },
+            }
           )
             .then((res) => res.json())
+            .then((json: any) => json.versions)
+            .then((versions) => Object.keys(versions))
+            .then((versions) => versions.length > 0)
             .catch(() => false);
 
           if (!typeExists) {
-            console.log(`Package ${packageName} does not have types`);
+            console.log(
+              `Package ${packageName} does not have types in DefinitelyTyped`
+            );
             this.dependenciesWithoutDefinitelyTyped.push(packageName);
             continue;
           }
