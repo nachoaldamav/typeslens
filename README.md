@@ -1,71 +1,34 @@
-# typeslense README
+# typeslens - Visual Studio Code Extension
 
-This is the README for your extension "typeslense". After writing up a brief description, we recommend including the following sections.
+## Overview
+typeslens is a Visual Studio Code extension designed to enhance your TypeScript development experience. It intelligently scans the imports in your code and alerts you whenever it detects a package that could benefit from TypeScript type definitions available on npm. If a corresponding @types package is available, typeslens suggests an inline notification, 'Install types for X (@types/X)', right in your imports.
+
+Streamline your TypeScript coding with this simple, yet powerful tool.
 
 ## Features
+- Automatic Parsing: Utilizes Babel to parse currently open files and extract all import statements.
+- Local Search for Modules: Identifies installed modules and checks for available TypeScript definitions.
+- Package Manager Compatibility: Detects and adheres to the package manager used in your project (npm, yarn, pnpm, bun, and Bit), with npm as the default.
+- Lockfile Analysis: Analyzes the lockfiles in your project's root directory to ensure compatibility with your package manager and project dependencies.
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+## Installation
+1. Open Visual Studio Code.
+2. Go to Extensions (Ctrl+Shift+X).
+3. Search for typeslens.
+4. Click on 'Install'.
 
-For example if there is an image subfolder under your extension project workspace:
+## Usage
+Once installed, typeslens works automatically. Open any TypeScript file, and the extension will:
 
-\!\[feature X\]\(images/feature-x.png\)
+1. Parse the file to identify all import statements.
+2. Check for installed modules without TypeScript definitions.
+3. Notify you in-line if an @types package is available for any of these modules.
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+## Contributing
+Your contributions are welcome! Whether it's bug reports, feature suggestions, or code contributions, please feel free to reach out or submit a pull request on our GitHub repository.
 
-## Requirements
+## Support
+If you encounter any issues or have questions, please file an issue on our GitHub issues page.
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
-
-## Extension Settings
-
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
-
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
-
-## Release Notes
-
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
----
-
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+## License
+This project is licensed under MIT License.
