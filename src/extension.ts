@@ -183,7 +183,10 @@ class TypeSuggestionCodeLensProvider implements vscode.CodeLensProvider {
 
           if (
             this.dependenciesWithoutDefinitelyTyped.includes(packageName) ||
-            packageName.startsWith('@types/')
+            packageName.startsWith('@types/') ||
+            packageName.startsWith('.') ||
+            packageName.startsWith('/') ||
+            packageName.startsWith('node:')
           ) {
             continue;
           }
