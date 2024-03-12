@@ -1,7 +1,7 @@
 {
   "name": "typeslens",
   "displayName": "typeslens",
-  "publisher": "ialdama",
+  "publisher": "ialdamav",
   "description": "Automatically install @types package for missing types.",
   "version": "0.0.1",
   "engines": {
@@ -40,6 +40,8 @@
     "@types/babel__core": "^7.20.5",
     "@types/mocha": "^10.0.6",
     "@types/node": "18.x",
+    "@types/pacote": "^11.1.8",
+    "@types/semver": "^7.5.8",
     "@types/vscode": "^1.87.0",
     "@typescript-eslint/eslint-plugin": "^7.0.2",
     "@typescript-eslint/parser": "^7.0.2",
@@ -54,6 +56,8 @@
   "dependencies": {
     "@babel/core": "^7.24.0",
     "@babel/parser": "^7.24.0",
-    "@babel/preset-typescript": "^7.23.3"
+    "@babel/preset-typescript": "^7.23.3",
+    "pacote": "^17.0.6",
+    "semver": "^7.6.0"
   }
 }

@@ -2,6 +2,8 @@ import * as vscode from 'vscode';
 import { parse } from '@babel/parser';
 import { join } from 'node:path';
 import fs from 'node:fs';
+import type { Manifest } from 'pacote';
+import semver from 'semver';
 import { convertToDefinitelyTyped } from './utils/name-to-typed';
 import { findPackageJson } from './utils/find-package';
 import { getPackageJsonFromName } from './utils/package-from-name';
@@ -205,46 +207,36 @@ class TypeSuggestionCodeLensProvider implements vscode.CodeLensProvider {
 
           const typesPackageName = convertToDefinitelyTyped(packageName);
 
-          const typeExists = await fetch(
-            `https://registry.npmjs.org/${typesPackageName}`,
-            {
-              // Request compressed metadata
-              headers: {
-                'Application-Accept': 'application/vnd.npm.install-v1+json',
-              },
-            }
-          )
-            .then((res) => res.json())
-            .then((json: any) => json.versions)
-            .then((versions) => Object.keys(versions))
-            .then((versions) => versions.length > 0)
-            .catch(() => false);
-
-          if (!typeExists) {
-            console.log(
-              `Package ${packageName} does not have types in DefinitelyTyped`
-            );
-            this.dependenciesWithoutDefinitelyTyped.push(packageName);
-            continue;
-          }
-
           // Check if the types package is already installed
-          const typesPackageJsonPath = findPackageJson(
-            // @ts-expect-error
-            findNearestNodeModules(document.uri.fsPath),
+          const nearestNodeModules = findNearestNodeModules(
+            document.uri.fsPath
+          );
+          const typesPackagePath = join(
+            nearestNodeModules as string,
             typesPackageName
           );
 
-          if (typesPackageJsonPath) {
-            console.log(`Package ${typesPackageName} is already installed`);
+          if (fs.existsSync(typesPackagePath)) {
+            console.log(
+              `Types package ${typesPackageName} is already installed`
+            );
             continue;
           }
 
+          console.log(`Types package ${typesPackageName} is not installed`);
+
+          // Check if the types package version that matches the original package's version is available
+          const packageVersion = packageJson.version;
+          const closestTypesVersion =
+            (await this.findClosestTypesVersion(packageName, packageVersion)) ??
+            'latest';
+
+          // Rest of your existing logic for creating a CodeLens
           const codeLens = new vscode.CodeLens(range, {
-            title: `Install types for ${packageName} (${typesPackageName})`,
+            title: `Install types for ${packageName} (${typesPackageName}@${closestTypesVersion})`,
             command: 'extension.installTypes',
-            arguments: [typesPackageName],
-            tooltip: `Install types for ${packageName} (${typesPackageName}@latest)`,
+            arguments: [`${typesPackageName}@${closestTypesVersion}`],
+            tooltip: `Install types for ${packageName} (${typesPackageName}@${closestTypesVersion})`,
           });
 
           codeLenses.push(codeLens);
@@ -263,5 +255,62 @@ class TypeSuggestionCodeLensProvider implements vscode.CodeLensProvider {
       codeLens.range = new vscode.Range(0, 0, 0, 0);
     }
     return codeLens;
+  }
+
+  private async findClosestTypesVersion(
+    packageName: string,
+    packageVersion: string
+  ): Promise<string | null> {
+    try {
+      // Fetch the manifest for the actual package
+      const packageManifest = (await fetch(
+        `https://registry.npmjs.org/${packageName}`
+      ).then((res) => res.json())) as any;
+
+      const packageReleaseDate = new Date(packageManifest.time[packageVersion]);
+
+      // Convert package name to DefinitelyTyped name
+      const typesPackageName = convertToDefinitelyTyped(packageName);
+
+      // Fetch the manifest for the types package
+      const typesManifest = (await fetch(
+        `https://registry.npmjs.org/${typesPackageName}`
+      ).then((res) => res.json())) as {
+        time: Record<string, string>;
+        versions: Record<string, Manifest>;
+      };
+
+      let closestVersion = null;
+      let minDateDiff = Number.POSITIVE_INFINITY;
+
+      // Iterate over versions to find the closest
+      for (const version in typesManifest.versions) {
+        const versionDate = new Date(typesManifest.time[version]);
+
+        // Ensure that the types package version date is the same or more recent
+        if (versionDate < packageReleaseDate) {
+          continue;
+        }
+
+        const dateDiff = Math.abs(
+          packageReleaseDate.getTime() - versionDate.getTime()
+        );
+
+        // Ensure that the types package version is semver-compatible
+        if (!semver.satisfies(version, `^${packageVersion}`)) {
+          continue;
+        }
+
+        if (dateDiff < minDateDiff) {
+          closestVersion = version;
+          minDateDiff = dateDiff;
+        }
+      }
+
+      return closestVersion;
+    } catch (error) {
+      console.error(`Error finding types version for ${packageName}: ${error}`);
+      return null;
+    }
   }
 }
